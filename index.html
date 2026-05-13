@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>♪ Canción del Día</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+
+body{font-family:'DM Sans',sans-serif;image-rendering:pixelated;min-height:100vh;}
+
+.scene{
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:0 0 40px;
+  position:relative;overflow:hidden;
+  transition:background 1.2s ease;
+  image-rendering:pixelated;
+}
+
+.scene.dawn    {background:linear-gradient(180deg,#FF6B6B 0%,#FFB347 35%,#FFE4B5 70%,#FFF8DC 100%);color:#5C2D2D;}
+.scene.morning {background:linear-gradient(180deg,#87CEEB 0%,#B0E0FF 45%,#E0F4FF 80%,#F5FBFF 100%);color:#0D3B66;}
+.scene.noon    {background:linear-gradient(180deg,#29B6F6 0%,#4FC3F7 30%,#B0E8FF 65%,#E8F7FF 100%);color:#0D3B66;}
+.scene.evening {background:linear-gradient(180deg,#4A0080 0%,#9D4EDD 20%,#C77DFF 40%,#FF8FAB 65%,#FFD4B8 85%,#FFE8D6 100%);color:#3D1A5A;}
+.scene.night   {background:linear-gradient(180deg,#0d0118 0%,#1a0a2e 30%,#2d0f50 55%,#4A0080 80%,#C77DFF 100%);color:#f0deff;}
+
+.cloud-layer{position:absolute;top:0;left:0;right:0;height:200px;pointer-events:none;z-index:1;}
+.cloud{position:absolute;image-rendering:pixelated;}
+.cloud canvas{display:block;}
+
+@keyframes drift1{0%{transform:translateX(-180px)}100%{transform:translateX(110vw)}}
+@keyframes drift2{0%{transform:translateX(-220px)}100%{transform:translateX(110vw)}}
+@keyframes drift3{0%{transform:translateX(-150px)}100%{transform:translateX(110vw)}}
+
+.c1{top:28px;animation:drift1 28s linear infinite;}
+.c2{top:60px;animation:drift2 38s linear infinite 12s;}
+.c3{top:18px;animation:drift3 22s linear infinite 5s;}
+.c4{top:80px;animation:drift1 45s linear infinite 20s;}
+.c5{top:45px;animation:drift2 32s linear infinite 8s;}
+
+.stars-layer{position:absolute;top:0;left:0;right:0;height:180px;pointer-events:none;z-index:0;}
+.star-px{position:absolute;image-rendering:pixelated;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+.content{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;gap:18px;padding:28px 20px 0;width:100%;}
+
+.pixel-badge{
+  font-family:'Press Start 2P',monospace;font-size:7px;
+  padding:6px 12px;
+  background:rgba(255,255,255,0.42);
+  border:3px solid rgba(255,255,255,0.7);
+  box-shadow:3px 3px 0 rgba(0,0,0,0.12);
+  letter-spacing:.05em;
+}
+
+.pixel-title{
+  font-family:'Press Start 2P',monospace;font-size:11px;
+  text-align:center;line-height:1.8;
+  text-shadow:3px 3px 0 rgba(0,0,0,0.12);
+  letter-spacing:.05em;
+}
+
+.pixel-date{
+  font-family:'Press Start 2P',monospace;font-size:7px;
+  padding:5px 14px;
+  background:rgba(255,255,255,0.3);
+  border:2px solid rgba(255,255,255,0.55);
+  box-shadow:2px 2px 0 rgba(0,0,0,0.1);
+}
+
+.pixel-card{
+  width:100%;max-width:520px;
+  background:rgba(255,255,255,0.52);
+  border:4px solid rgba(255,255,255,0.75);
+  box-shadow:6px 6px 0 rgba(0,0,0,0.1);
+  padding:22px;
+}
+
+.field-label{
+  display:block;font-family:'Press Start 2P',monospace;font-size:7px;
+  letter-spacing:.08em;opacity:.65;margin-bottom:8px;line-height:1.6;
+}
+
+input[type=text],input[type=password],textarea{
+  width:100%;padding:10px 13px;
+  border:3px solid rgba(255,255,255,0.7);
+  background:rgba(255,255,255,0.6);
+  font-family:'DM Sans',sans-serif;font-size:14px;
+  outline:none;margin-bottom:14px;
+  box-shadow:3px 3px 0 rgba(0,0,0,0.08);
+  transition:border .2s,background .2s;color:inherit;resize:vertical;
+}
+input:focus,textarea:focus{border-color:rgba(255,255,255,.95);background:rgba(255,255,255,.78);}
+
+.btn{
+  width:100%;padding:13px;border:none;
+  font-family:'Press Start 2P',monospace;font-size:8px;
+  cursor:pointer;transition:transform .12s,box-shadow .12s;
+  box-shadow:4px 4px 0 rgba(0,0,0,0.15);
+  letter-spacing:.05em;line-height:1.6;
+}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 rgba(0,0,0,0.15);}
+.btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 rgba(0,0,0,0.15);}
+.btn-main{background:rgba(255,255,255,0.78);color:inherit;}
+.btn-ghost{background:rgba(255,255,255,0.38);border:3px solid rgba(255,255,255,0.6);color:inherit;margin-top:8px;font-size:7px;padding:10px;}
+
+.hint{font-size:11px;opacity:.5;text-align:center;margin-top:10px;line-height:1.6;}
+
+.album-row{display:flex;align-items:flex-start;gap:16px;margin-bottom:16px;}
+
+.album-art{
+  width:96px;height:96px;flex-shrink:0;
+  border:4px solid rgba(255,255,255,0.8);
+  box-shadow:4px 4px 0 rgba(0,0,0,0.12);
+  overflow:hidden;position:relative;
+  display:flex;align-items:center;justify-content:center;
+  font-size:42px;
+  background:rgba(255,255,255,0.3);
+}
+.album-art img{width:100%;height:100%;object-fit:cover;}
+.loading-px{
+  font-family:'Press Start 2P',monospace;font-size:7px;
+  opacity:.5;text-align:center;line-height:1.8;padding:4px;
+}
+
+.song-name{
+  font-family:'Press Start 2P',monospace;font-size:9px;
+  line-height:1.8;margin-bottom:6px;
+  word-break:break-word;
+}
+.song-artist{font-size:13px;opacity:.72;margin-bottom:4px;}
+.song-meta{font-family:'Press Start 2P',monospace;font-size:6px;opacity:.45;margin-top:6px;line-height:1.8;}
+
+.progress{width:100%;height:8px;background:rgba(255,255,255,0.28);border:2px solid rgba(255,255,255,0.45);margin-bottom:16px;box-shadow:inset 2px 2px 0 rgba(0,0,0,0.06);}
+.progress-fill{height:100%;background:rgba(255,255,255,0.78);transition:width .6s;}
+
+.controls{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px;}
+.ctrl{
+  background:rgba(255,255,255,0.45);border:3px solid rgba(255,255,255,0.7);
+  width:46px;height:46px;display:flex;align-items:center;
+  justify-content:center;
+  cursor:pointer;font-size:18px;transition:transform .12s,box-shadow .12s;
+  box-shadow:3px 3px 0 rgba(0,0,0,0.1);
+}
+.ctrl.big{width:58px;height:58px;font-size:24px;background:rgba(255,255,255,0.62);}
+.ctrl:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 rgba(0,0,0,0.12);}
+.ctrl:active{transform:translate(1px,1px);box-shadow:1px 1px 0 rgba(0,0,0,0.1);}
+
+.yt-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:10px 20px;background:rgba(255,255,255,0.38);
+  border:3px solid rgba(255,255,255,0.6);
+  font-family:'Press Start 2P',monospace;font-size:7px;
+  cursor:pointer;width:100%;box-shadow:3px 3px 0 rgba(0,0,0,0.1);
+  text-decoration:none;color:inherit;transition:transform .12s,box-shadow .12s;
+  line-height:1.6;
+}
+.yt-btn:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 rgba(0,0,0,0.1);}
+
+.dedication-card{
+  width:100%;max-width:520px;
+  background:rgba(255,255,255,0.3);
+  border:3px solid rgba(255,255,255,0.5);
+  box-shadow:4px 4px 0 rgba(0,0,0,0.08);
+  padding:18px;text-align:center;
+  font-size:14px;line-height:1.7;opacity:.88;
+  font-style:italic;
+}
+
+.settings-row{width:100%;max-width:520px;display:flex;justify-content:flex-end;}
+.settings-link{
+  background:rgba(255,255,255,0.32);border:2px solid rgba(255,255,255,0.45);
+  padding:5px 12px;font-family:'Press Start 2P',monospace;font-size:6px;
+  cursor:pointer;opacity:.7;transition:opacity .2s;color:inherit;
+  box-shadow:2px 2px 0 rgba(0,0,0,0.08);
+}
+.settings-link:hover{opacity:1;}
+
+#screen-setup,#screen-song{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;}
+#screen-song{display:none;}
+</style>
+</head>
+<body>
+
+<div class="scene" id="scene">
+  <div class="stars-layer" id="starsLayer"></div>
+  <div class="cloud-layer" id="cloudLayer"></div>
+
+  <div class="content">
+    <div class="pixel-badge" id="timeBadge">✨ LOADING...</div>
+    <div class="pixel-title">♪ CANCIÓN DEL DÍA ♪</div>
+    <div class="pixel-date" id="datePill"></div>
+
+    <!-- SETUP SCREEN -->
+    <div id="screen-setup">
+      <div class="pixel-card" style="width:100%;max-width:520px;">
+        <label class="field-label">► QUIÉN ENVÍA 💌</label>
+        <input type="text" id="inName" placeholder="ej. Valentina" />
+
+        <label class="field-label">► PARA QUIÉN 🩷</label>
+        <input type="text" id="inPookie" placeholder="ej. Mateo" />
+
+        <label class="field-label">► LAST.FM API KEY (para fotos de álbum)</label>
+        <input type="text" id="inApiKey" placeholder="déjalo vacío si no tienes" />
+
+        <label class="field-label">► CANCIONES 🎵 (una por línea: Canción - Artista)</label>
+        <textarea id="inSongs" rows="8" placeholder="Flowers - Miley Cyrus
+Lover - Taylor Swift
+Perfect - Ed Sheeran
+Die With A Smile - Lady Gaga
+La Bicicleta - Shakira
+Hawái - Maluma
+Tusa - Karol G"></textarea>
+
+        <button class="btn btn-main" onclick="guardar()">► VER CANCIÓN DEL DÍA ◄</button>
+        <p class="hint">La app elige una canción diferente cada día automáticamente 🌸<br>Tu lista se guarda para la próxima vez</p>
+      </div>
+    </div>
+
+    <!-- SONG SCREEN -->
+    <div id="screen-song">
+      <div class="settings-row">
+        <button class="settings-link" onclick="verSetup()">⚙ EDITAR LISTA</button>
+      </div>
+
+      <div class="pixel-card" style="width:100%;max-width:520px;">
+        <div class="album-row">
+          <div class="album-art" id="albumArt"><span id="albumEmoji">🎵</span></div>
+          <div style="min-width:0;flex:1;">
+            <div class="song-name" id="songName">—</div>
+            <div class="song-artist" id="songArtist">—</div>
+            <div class="song-meta" id="songMeta"></div>
+          </div>
+        </div>
+
+        <div class="progress"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+        <div class="controls">
+          <button class="ctrl" onclick="buscarYT()" title="Buscar en YouTube">▶</button>
+          <button class="ctrl big">♪</button>
+          <button class="ctrl" onclick="otraSorpresa()" title="Canción sorpresa">↺</button>
+        </div>
+
+        <a class="yt-btn" id="ytBtn" href="#" target="_blank">♫ BUSCAR EN YOUTUBE MUSIC</a>
+        <button class="btn btn-ghost" onclick="otraSorpresa()" style="margin-top:10px;">↺ OTRA CANCIÓN SORPRESA</button>
+      </div>
+
+      <div class="dedication-card" id="dedicationCard"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const THEMES={
+  dawn:   {h:[5,6,7,8],      cls:'dawn',    badge:'★ AMANECER ★', sub:'El mundo despierta contigo'},
+  morning:{h:[9,10],         cls:'morning',  badge:'☀ MAÑANA ☀',   sub:'La mañana brilla para ti'},
+  noon:   {h:[11,12,13,14,15,16],cls:'noon',badge:'◉ MEDIODÍA ◉',  sub:'La luz del día en tu sonrisa'},
+  evening:{h:[17,18,19],     cls:'evening',  badge:'★ ATARDECER ★', sub:'El cielo se pinta por ti'},
+  night:  {h:[20,21,22,23,0,1,2,3,4],cls:'night',badge:'✦ NOCHE ✦',sub:'Las estrellas te cantan'}
+};
+const EMOJIS=['🌸','🌺','🌻','🌹','💐','🌷','✨','💫','🎶','🎵','💕','🩷','💜','🌙','⭐','🎀'];
+let state={name:'',pookie:'',songs:[],apiKey:'',themeKey:'noon'};
+
+function getTheme(){
+  const h=new Date().getHours();
+  for(const[k,t]of Object.entries(THEMES))if(t.h.includes(h))return{key:k,...t};
+  return{key:'night',...THEMES.night};
+}
+
+function formatDate(){
+  const d=new Date();
+  const dias=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  return `${dias[d.getDay()]} ${d.getDate()} de ${meses[d.getMonth()]}`.toUpperCase();
+}
+
+function getDailySong(songs){
+  const d=new Date();
+  const seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+  return songs[seed%songs.length];
+}
+
+function getDedication(pookie,name,tk){
+  const m={
+    dawn:[`🌅 Para ${pookie}, con todo el amor del amanecer... esta canción es tuya hoy 💛`,`Que este día empiece con música bonita, ${pookie}. Con cariño, ${name} 🌸`],
+    morning:[`☀️ ¡Buenos días, ${pookie}! ${name} pensó en ti al elegir esta canción 🌼`,`La mañana es más bonita cuando hay música para ti, ${pookie} 💛`],
+    noon:[`✨ En este mediodía, ${pookie}, una canción que te abraza desde lejos. Con amor, ${name} 💫`,`🎵 Para ${pookie}, con todo el sol del mediodía 🌻`],
+    evening:[`🌅 Al caer la tarde, ${pookie}, esta canción es solo tuya. Con cariño, ${name} 💜`,`El atardecer es más bello cuando lo comparto contigo, ${pookie} 🌸`],
+    night:[`🌙 Buenas noches, ${pookie}. Esta canción te cuida mientras duermes. Con amor, ${name} ⭐`,`✨ Para ${pookie}, con todo el brillo de las estrellas. Siempre, ${name} 💫`]
+  };
+  const opts=m[tk]||m.night;
+  return opts[new Date().getDate()%opts.length];
+}
+
+function parseSongs(raw){return raw.split('\n').map(s=>s.trim()).filter(s=>s.length>0);}
+function parseSong(line){
+  const parts=line.split(/\s*[-–—]\s*/);
+  if(parts.length>=2)return{name:parts[0].trim(),artist:parts.slice(1).join(' ').trim(),full:line.trim()};
+  return{name:line.trim(),artist:'',full:line.trim()};
+}
+function randomEmoji(){return EMOJIS[Math.floor(Math.random()*EMOJIS.length)];}
+
+async function fetchAlbumArt(name,artist,apiKey){
+  if(!apiKey||!artist)return null;
+  try{
+    const url=`https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${apiKey}&artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(name)}&format=json`;
+    const res=await fetch(url);
+    const data=await res.json();
+    const images=data?.track?.album?.image;
+    if(images){
+      const large=images.find(i=>i.size==='extralarge')||images.find(i=>i.size==='large')||images[images.length-1];
+      if(large&&large['#text'])return large['#text'];
+    }
+  }catch(e){}
+  return null;
+}
+
+function guardar(){
+  const n=document.getElementById('inName').value.trim();
+  const p=document.getElementById('inPookie').value.trim();
+  const raw=document.getElementById('inSongs').value.trim();
+  const ak=document.getElementById('inApiKey').value.trim();
+  if(!n||!p||!raw){alert('¡Completa todos los campos, pookie! 🌸');return;}
+  const songs=parseSongs(raw);
+  if(!songs.length){alert('Agrega al menos una canción 🎵');return;}
+  state={name:n,pookie:p,songs,apiKey:ak,themeKey:getTheme().key};
+  try{localStorage.setItem('cddia2',JSON.stringify({name:n,pookie:p,raw,apiKey:ak}));}catch(e){}
+  mostrarCancion();
+}
+
+function otraSorpresa(){
+  if(!state.songs.length)return;
+  mostrarCancionIdx(Math.floor(Math.random()*state.songs.length),true);
+}
+
+function mostrarCancion(){
+  const daily=getDailySong(state.songs);
+  const idx=state.songs.indexOf(daily);
+  mostrarCancionIdx(idx<0?0:idx,false);
+}
+
+async function mostrarCancionIdx(idx,isSurprise){
+  const line=state.songs[idx];
+  const parsed=parseSong(line);
+  document.getElementById('songName').textContent=parsed.name;
+  document.getElementById('songArtist').textContent=parsed.artist||'♪';
+  document.getElementById('songMeta').textContent=isSurprise?'↺ CANCIÓN SORPRESA':`♪ CANCIÓN DEL DÍA  •  #${idx+1} DE ${state.songs.length}`;
+  document.getElementById('progressFill').style.width=(30+Math.floor(Math.random()*55))+'%';
+  const q=encodeURIComponent(parsed.full);
+  document.getElementById('ytBtn').href=`https://music.youtube.com/search?q=${q}`;
+  document.getElementById('dedicationCard').textContent=getDedication(state.pookie,state.name,state.themeKey);
+
+  const artEl=document.getElementById('albumArt');
+  artEl.innerHTML='<div class="loading-px">...</div>';
+  document.getElementById('screen-setup').style.display='none';
+  document.getElementById('screen-song').style.display='flex';
+
+  if(state.apiKey&&parsed.artist){
+    const imgUrl=await fetchAlbumArt(parsed.name,parsed.artist,state.apiKey);
+    if(imgUrl){
+      artEl.innerHTML=`<img src="${imgUrl}" alt="album" onerror="this.parentNode.innerHTML='<span style=\\'font-size:42px\\'>${randomEmoji()}</span>'" />`;
+      return;
+    }
+  }
+  artEl.innerHTML=`<span style="font-size:42px">${randomEmoji()}</span>`;
+}
+
+function buscarYT(){
+  const btn=document.getElementById('ytBtn');
+  if(btn.href&&btn.href!='#')window.open(btn.href,'_blank');
+}
+
+function verSetup(){
+  document.getElementById('screen-song').style.display='none';
+  document.getElementById('screen-setup').style.display='flex';
+}
+
+function drawCloud(color,alpha){
+  const c=document.createElement('canvas');
+  const blocks=[[3,1],[4,1],[5,1],[6,1],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0],[1,1],[2,1],[7,1],[8,1],[9,1],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[10,2],[0,3],[1,3],[2,3],[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[9,3],[10,3]];
+  const bs=6;
+  const maxX=Math.max(...blocks.map(b=>b[0]))+1;
+  const maxY=Math.max(...blocks.map(b=>b[1]))+1;
+  c.width=maxX*bs;c.height=maxY*bs;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle=`rgba(${color},${alpha})`;
+  blocks.forEach(([x,y])=>ctx.fillRect(x*bs,y*bs,bs,bs));
+  ctx.fillStyle=`rgba(255,255,255,${alpha*0.5})`;
+  [[3,1],[4,1],[5,1],[2,0],[3,0]].forEach(([x,y])=>ctx.fillRect(x*bs,y*bs,bs,bs));
+  return c;
+}
+
+function buildClouds(themeKey){
+  const cl=document.getElementById('cloudLayer');cl.innerHTML='';
+  const isNight=themeKey==='night';
+  const color=isNight?'200,180,255':'255,255,255';
+  [{cls:'c1',alpha:.85,scale:1.4},{cls:'c2',alpha:.7,scale:1},{cls:'c3',alpha:.9,scale:1.2},{cls:'c4',alpha:.65,scale:.85},{cls:'c5',alpha:.75,scale:1.1}]
+  .forEach(cfg=>{
+    const div=document.createElement('div');
+    div.className='cloud '+cfg.cls;
+    const c=drawCloud(color,cfg.alpha);
+    c.style.transform=`scale(${cfg.scale})`;
+    c.style.transformOrigin='left top';
+    div.appendChild(c);
+    cl.appendChild(div);
+  });
+}
+
+function buildStars(themeKey){
+  const sl=document.getElementById('starsLayer');sl.innerHTML='';
+  if(themeKey!=='night'&&themeKey!=='evening')return;
+  const count=themeKey==='night'?28:12;
+  for(let i=0;i<count;i++){
+    const s=document.createElement('div');
+    s.className='star-px';
+    const size=Math.random()<.3?4:2;
+    s.style.cssText=`width:${size}px;height:${size}px;background:rgba(255,255,255,${0.5+Math.random()*.5});left:${Math.random()*98}%;top:${Math.random()*90}%;animation:blink ${1.5+Math.random()*2.5}s ease-in-out infinite ${Math.random()*3}s;`;
+    sl.appendChild(s);
+  }
+}
+
+function init(){
+  const theme=getTheme();
+  state.themeKey=theme.key;
+  document.getElementById('scene').className='scene '+theme.cls;
+  document.getElementById('timeBadge').textContent=theme.badge;
+  document.getElementById('datePill').textContent=formatDate();
+  buildClouds(theme.key);
+  buildStars(theme.key);
+  try{
+    const saved=JSON.parse(localStorage.getItem('cddia2')||'{}');
+    if(saved.name)document.getElementById('inName').value=saved.name;
+    if(saved.pookie)document.getElementById('inPookie').value=saved.pookie;
+    if(saved.raw)document.getElementById('inSongs').value=saved.raw;
+    if(saved.apiKey)document.getElementById('inApiKey').value=saved.apiKey;
+  }catch(e){}
+}
+
+init();
+</script>
+</body>
+</html>
